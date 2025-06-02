@@ -1,0 +1,26 @@
+# Step 1: Use an official Maven runtime to build the application
+FROM maven:3.8.5-openjdk-17 AS spring_build
+
+# Step 2: Set the working directory in the container for the build stage
+WORKDIR /app
+
+# Step 3: Copy the entire project into the container
+COPY . .
+
+# Step 4: Run Maven to build the project and package it into a JAR file
+RUN mvn clean install -DskipTests
+
+# Step 5: Use an official OpenJDK runtime for running the application
+FROM openjdk:17-jdk-alpine
+
+# Step 6: Set the working directory in the container for the runtime stage
+WORKDIR /app
+
+# Step 7: Copy the JAR file from the build stage to the runtime stage
+COPY --from=spring_build /app/target/bloodx-1.0.0.jar /app/bloodx-1.0.0.jar
+
+# Step 8: Expose the port that the Spring Boot application will run on
+EXPOSE 8080
+
+# Step 9: Define the entry point to run the Spring Boot application
+ENTRYPOINT ["java", "-jar", "bloodx-1.0.0.jar"]
